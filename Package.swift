@@ -15,9 +15,11 @@ let package = Package(
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "RoveComm_Swift"),
+            name: "RoveComm_Swift",
+            resources: [
+                .copy("Resources/Manifest/manifest.json"),
+            ]),
         .testTarget(
             name: "RoveComm_SwiftTests",
             dependencies: ["RoveComm_Swift"]),
-    ]
-)
+    ])
