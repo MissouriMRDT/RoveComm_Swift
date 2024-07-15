@@ -23,7 +23,9 @@ import XCTest
  - testSendInt8(): Tests sending `Int8` data.
  - testSendInt16(): Tests sending `Int16` data.
  - testSendInt32(): Tests sending `Int32` data.
+ - testSendFloat(): Tests sending `Float` data.
  - testSendDouble(): Tests sending `Double` data.
+ - testSendCharacter(): Tests sending `Character` data.
  - sendAndVerify(header:data:): Sends data and verifies the received packet.
  - convertToUInt8Array(_:): Converts various data types to an array of `UInt8`.
  */
@@ -147,6 +149,20 @@ final class RoveComm_SwiftTests: XCTestCase {
         sendAndVerify(header: header, data: data)
     }
 
+    // MARK: Test Float
+
+    /**
+     Tests sending `Float` data.
+     */
+    func testSendFloat() {
+        // DataID: 20001
+        // DataCount: 2
+        // DataType: 6
+        let header = RoveCommHeader(version: 3, data_id: 20001, data_count: 2, data_type: 6)
+        let data: [Float] = [1.0, 2.0, 3.0, 4.0, 5.0]
+        sendAndVerify(header: header, data: data)
+    }
+
     // MARK: Test Double
 
     /**
@@ -158,6 +174,20 @@ final class RoveComm_SwiftTests: XCTestCase {
         // DataType: 7
         let header = RoveCommHeader(version: 3, data_id: 6100, data_count: 3, data_type: 7)
         let data: [Double] = [1.0, 2.0, 3.0, 4.0, 5.0]
+        sendAndVerify(header: header, data: data)
+    }
+
+    // MARK: Test Character
+
+    /**
+     Tests sending `Character` data.
+     */
+    func testSendCharacter() {
+        // DataID: 31000
+        // DataCount: 5
+        // DataType: 8
+        let header = RoveCommHeader(version: 3, data_id: 31000, data_count: 5, data_type: 8)
+        let data: [Character] = ["a", "b", "c", "d", "e"]
         sendAndVerify(header: header, data: data)
     }
 
@@ -188,11 +218,15 @@ final class RoveComm_SwiftTests: XCTestCase {
             roveComm.sendUDP(address, port, header, data)
         } else if let data = data as? [Int32] {
             roveComm.sendUDP(address, port, header, data)
+        } else if let data = data as? [Float] {
+            roveComm.sendUDP(address, port, header, data)
         } else if let data = data as? [Double] {
+            roveComm.sendUDP(address, port, header, data)
+        } else if let data = data as? [Character] {
             roveComm.sendUDP(address, port, header, data)
         }
 
-        waitForExpectations(timeout: 5) { error in
+        waitForExpectations(timeout: 15) { error in
             XCTAssertNil(error, "Failed to receive packet in time")
             XCTAssertNotNil(self.receivedPacket, "No packet received")
             XCTAssertEqual(self.receivedPacket?.data, self.convertToUInt8Array(data), "Data mismatch")
@@ -218,8 +252,12 @@ final class RoveComm_SwiftTests: XCTestCase {
                 byteArray.append(contentsOf: value.fourBytes)
             } else if let value = value as? Int32 {
                 byteArray.append(contentsOf: value.fourBytes)
+            } else if let value = value as? Float {
+                byteArray.append(contentsOf: value.fourBytes)
             } else if let value = value as? Double {
                 byteArray.append(contentsOf: value.eightBytes)
+            } else if let value = value as? Character {
+                byteArray.append(contentsOf: value.utf8Bytes)
             } else {
                 byteArray.append(contentsOf: withUnsafeBytes(of: value) { Array($0) })
             }

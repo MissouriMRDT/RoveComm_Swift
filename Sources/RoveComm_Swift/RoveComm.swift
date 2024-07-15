@@ -10,7 +10,7 @@ import Network
 // MARK: RoveComm Class
 
 /**
- The `RoveComm` class provides functionality for sending UDP packets over a network. It supports sending data in various types such as `UInt8`, `UInt16`, `UInt32`, `Int8`, `Int16`, `Int32`, and `Double`.
+ The `RoveComm` class provides functionality for sending UDP packets over a network. It supports sending data in various types such as `UInt8`, `UInt16`, `UInt32`, `Int8`, `Int16`, `Int32`, `Float`, `Double`, and `Character`.
 
  Methods:
  --------
@@ -107,6 +107,20 @@ class RoveComm {
     }
 
     /**
+     Sends a UDP packet with `Float` data to the specified host and port.
+
+     - Parameters:
+       - host: The host to send the packet to.
+       - port: The port to send the packet to.
+       - header: The header of the packet.
+       - data: The data to be sent.
+     */
+    func sendUDP(_ host: String, _ port: Int, _ header: RoveCommHeader, _ data: [Float]) {
+        let packet = createPacket(header, data)
+        sendUDPPacket(host, port, packet)
+    }
+
+    /**
      Sends a UDP packet with `Double` data to the specified host and port.
 
      - Parameters:
@@ -116,6 +130,20 @@ class RoveComm {
        - data: The data to be sent.
      */
     func sendUDP(_ host: String, _ port: Int, _ header: RoveCommHeader, _ data: [Double]) {
+        let packet = createPacket(header, data)
+        sendUDPPacket(host, port, packet)
+    }
+
+    /**
+     Sends a UDP packet with `Character` data to the specified host and port.
+
+     - Parameters:
+       - host: The host to send the packet to.
+       - port: The port to send the packet to.
+       - header: The header of the packet.
+       - data: The data to be sent.
+     */
+    func sendUDP(_ host: String, _ port: Int, _ header: RoveCommHeader, _ data: [Character]) {
         let packet = createPacket(header, data)
         sendUDPPacket(host, port, packet)
     }
@@ -235,6 +263,25 @@ class RoveComm {
     }
 
     /**
+     Creates a data packet with the specified header and `Float` data.
+
+     - Parameters:
+       - header: The header of the packet.
+       - data: The data to be included in the packet.
+     - Returns: The created data packet.
+     */
+    private func createPacket(_ header: RoveCommHeader, _ data: [Float]) -> Data {
+        var packet = Data([header.version])
+        packet.append(contentsOf: header.data_id.twoBytes)
+        packet.append(contentsOf: header.data_count.twoBytes)
+        packet.append(header.data_type)
+        for value in data {
+            packet.append(contentsOf: value.fourBytes)
+        }
+        return packet
+    }
+
+    /**
      Creates a data packet with the specified header and `Double` data.
 
      - Parameters:
@@ -249,6 +296,25 @@ class RoveComm {
         packet.append(header.data_type)
         for value in data {
             packet.append(contentsOf: value.eightBytes)
+        }
+        return packet
+    }
+
+    /**
+     Creates a data packet with the specified header and `Character` data.
+
+     - Parameters:
+       - header: The header of the packet.
+       - data: The data to be included in the packet.
+     - Returns: The created data packet.
+     */
+    private func createPacket(_ header: RoveCommHeader, _ data: [Character]) -> Data {
+        var packet = Data([header.version])
+        packet.append(contentsOf: header.data_id.twoBytes)
+        packet.append(contentsOf: header.data_count.twoBytes)
+        packet.append(header.data_type)
+        for value in data {
+            packet.append(contentsOf: Array(String(value).utf8))
         }
         return packet
     }
