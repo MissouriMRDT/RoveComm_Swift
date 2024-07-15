@@ -1,0 +1,40 @@
+name: Swift
+
+on:
+  push:
+    branches:
+      - development
+  pull_request:
+    branches:
+      - development
+
+jobs:
+  test:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Swift
+      uses: fwal/setup-swift@v1
+      with:
+        swift-version: '5.10'  # Update to your required Swift version
+
+    - name: Build and run tests
+      run: swift test
+
+    - name: Archive test results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results
+        path: .build/debug/TestResults.xcresult
+
+    - name: Upload test coverage report
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-coverage
+        path: .build/debug/codecov
+
